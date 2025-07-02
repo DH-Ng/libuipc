@@ -233,7 +233,9 @@ class FiniteElementMethod final : public SimSystem
         bool try_recover(RecoverInfo& info);
         void apply_recover(RecoverInfo& info);
         void clear_recover(RecoverInfo& info);
-
+        
+        bool write_vertex_pos_to_sim(span<const Vector3> positions, IndexT vertex_offset, SizeT vertex_count);
+        
         // Forward Simulation:
 
         GlobalVertexManager* global_vertex_manager = nullptr;
@@ -251,7 +253,6 @@ class FiniteElementMethod final : public SimSystem
         // Core Invariant Data:
 
         vector<GeoInfo> geo_infos;
-
 
         // Related Data:
 
@@ -490,11 +491,13 @@ class FiniteElementMethod final : public SimSystem
                           ForEachGeometry&&               for_each);
 
     virtual void do_build() override;
-
+    
     virtual bool do_dump(DumpInfo& info) override;
     virtual bool do_try_recover(RecoverInfo& info) override;
     virtual void do_apply_recover(RecoverInfo& info) override;
     virtual void do_clear_recover(RecoverInfo& info) override;
+
+    virtual bool do_write_vertex_pos_to_sim(span<const Vector3> positions, IndexT vertex_offset, SizeT vertex_count);
 
     Impl m_impl;
 };

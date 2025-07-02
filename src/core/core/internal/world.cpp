@@ -8,6 +8,7 @@
 #include <uipc/backend/module_init_info.h>
 #include <uipc/core/internal/scene.h>
 
+#include <iostream>
 
 namespace uipc::core::internal
 {
@@ -161,6 +162,27 @@ bool World::recover(SizeT aim_frame)
         auto& diff_sim = m_scene->diff_sim();
         if(diff_sim.parameters().size() > 0)
             diff_sim.parameters().broadcast();
+    }
+
+    return success && !has_error;
+}
+
+bool World::write_vertex_pos_to_sim(span<const Vector3> positions, IndexT global_vertex_offset, IndexT local_vertex_offset, SizeT vertex_count, string system_name)
+{   
+    std::cout << "write_vertex_pos in world: test " << "\n";
+    
+    if(!m_valid)
+    {
+        spdlog::error("World is not valid, skipping writing_vertex_pos_to_sim.");
+        return false;
+    }
+
+    bool success   = m_engine->write_vertex_pos_to_sim(positions, global_vertex_offset, local_vertex_offset, vertex_count, system_name);
+    bool has_error = m_engine->status().has_error();
+    if(has_error)
+    {
+        spdlog::error("Engine has error after dump, world becomes invalid.");
+        m_valid = false;
     }
 
     return success && !has_error;

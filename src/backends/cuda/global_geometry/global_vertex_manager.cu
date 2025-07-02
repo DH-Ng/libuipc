@@ -19,6 +19,8 @@ void GlobalVertexManager::Impl::init()
     for(auto&& [i, R] : enumerate(vertex_reporter_view))
         R->m_index = i;
 
+
+
     // 2) Count the number of vertices reported by each reporter
     auto N = vertex_reporter_view.size();
     reporter_vertex_offsets_counts.resize(N);
@@ -31,6 +33,7 @@ void GlobalVertexManager::Impl::init()
         R->report_count(info);
         // get count back
         reporter_vertex_counts[i] = info.m_count;
+        std::cout << "vertex_reporter i : " << i <<"\n";
     }
     reporter_vertex_offsets_counts.scan();
     SizeT total_count = reporter_vertex_offsets_counts.total_count();
@@ -184,6 +187,26 @@ void GlobalVertexManager::Impl::clear_recover(RecoverInfo& info)
     dump_positions.clean_up();
     dump_prev_positions.clean_up();
 }
+
+bool GlobalVertexManager::Impl::write_vertex_pos_to_sim(span<const Vector3> new_positions, IndexT global_vertex_offset, SizeT vertex_count) //span<const IndexT> global_vertex_indices, 
+{
+
+    std::cout << "write vertex pos in GlobalVertexManager: " <<"\n";
+
+    std::cout << "global vertex counts total: " << reporter_vertex_offsets_counts.total_count() <<"\n";
+
+    std::cout << "global vertex offsets test: " <<"\n";
+    for(auto idx: reporter_vertex_offsets_counts.counts()) {
+        std::cout << idx << "\n";
+    }
+
+    std::cout << "global vertex offset: " << global_vertex_offset << ", vertex count: " << vertex_count << "\n";
+    positions.view(global_vertex_offset, vertex_count).copy_from(new_positions.data());
+    prev_positions.view(global_vertex_offset, vertex_count).copy_from(new_positions.data());
+
+    return true;
+}
+
 }  // namespace uipc::backend::cuda
 
 
@@ -279,6 +302,11 @@ void GlobalVertexManager::do_apply_recover(RecoverInfo& info)
 void GlobalVertexManager::do_clear_recover(RecoverInfo& info)
 {
     m_impl.clear_recover(info);
+}
+
+bool GlobalVertexManager::do_write_vertex_pos_to_sim(span<const Vector3> new_positions, IndexT global_vertex_offset, SizeT vertex_count)
+{
+    return m_impl.write_vertex_pos_to_sim(new_positions, global_vertex_offset, vertex_count);
 }
 
 void GlobalVertexManager::init()

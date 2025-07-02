@@ -149,6 +149,12 @@ class Engine::Impl
         return m_engine->recover(dst_frame);
     }
 
+    bool do_write_vertex_pos_to_sim(span<const Vector3> positions, IndexT global_vertex_offset, IndexT local_vertex_offset, SizeT vertex_count, string system_name)
+    {
+        LogPatternGuard guard{backend_name()};       
+        return m_engine->write_vertex_pos_to_sim(positions, global_vertex_offset, local_vertex_offset, vertex_count, system_name);
+    }
+    
     SizeT get_frame() const
     {
         LogPatternGuard guard{backend_name()};
@@ -280,6 +286,11 @@ void Engine::sync()
 void Engine::retrieve()
 {
     m_impl->retrieve();
+}
+
+bool Engine::write_vertex_pos_to_sim(span<const Vector3> positions, IndexT global_vertex_offset, IndexT local_vertex_offset, SizeT vertex_count, string system_name)
+{
+    return m_impl->do_write_vertex_pos_to_sim(positions, global_vertex_offset, local_vertex_offset, vertex_count, system_name);
 }
 
 Json Engine::to_json() const

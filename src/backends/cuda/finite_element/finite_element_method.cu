@@ -28,6 +28,9 @@
 #include <finite_element/finite_element_constitution_diff_parm_reporter.h>
 #include <finite_element/finite_element_extra_constitution_diff_parm_reporter.h>
 
+//TODO remove
+#include <iostream>
+#include <vector>
 
 namespace uipc::backend
 {
@@ -122,6 +125,7 @@ void FiniteElementMethod::init()
     m_impl.init(world());
 }
 
+
 bool FiniteElementMethod::do_dump(DumpInfo& info)
 {
     return m_impl.dump(info);
@@ -140,6 +144,11 @@ void FiniteElementMethod::do_apply_recover(RecoverInfo& info)
 void FiniteElementMethod::do_clear_recover(RecoverInfo& info)
 {
     m_impl.clear_recover(info);
+}
+
+bool FiniteElementMethod::do_write_vertex_pos_to_sim(span<const Vector3> positions, IndexT vertex_offset, SizeT vertex_count)
+{
+    return m_impl.write_vertex_pos_to_sim(positions, vertex_offset, vertex_count);
 }
 
 void FiniteElementMethod::Impl::init(WorldVisitor& world)
@@ -1091,6 +1100,7 @@ void FiniteElementMethod::Impl::write_scene(WorldVisitor& world)
         // TODO:
         // Now there is no topology modification, so no need to write back
         // In the future, we may need to write back the topology if the topology is modified
+    
     }
 }
 }  // namespace uipc::backend::cuda
@@ -1146,6 +1156,28 @@ void FiniteElementMethod::Impl::clear_recover(RecoverInfo& info)
     dump_xs.clean_up();
     dump_vs.clean_up();
     dump_x_prevs.clean_up();
+}
+
+bool FiniteElementMethod::Impl::write_vertex_pos_to_sim(span<const Vector3> positions, IndexT vertex_offset, SizeT vertex_count)
+{
+    // const auto& scene = this->world().scene();
+    // auto geo_slots = scene.geometries();
+
+    std::cout << "write_vertex_pos_to_sim FEM: " <<"\n";
+    
+    std::cout << "vertex_offset " << vertex_offset << "\n";
+    std::cout << "vertex_count " << vertex_count << "\n";
+
+        
+    // buffer.resize(byte_buffer.size() / sizeof(T));
+    xs.view(vertex_offset, vertex_count).copy_from(positions.data());
+    x_prevs.view(vertex_offset, vertex_count).copy_from(positions.data());
+    
+    vector<Vector3> vel;
+    vel.resize(vertex_count, Vector3::Zero());
+    vs.view(vertex_offset, vertex_count).copy_from(span{vel}.data());
+    
+    return true;
 }
 
 void FiniteElementMethod::Impl::set_dof_info(SizeT frame, IndexT dof_offset, IndexT dof_count)

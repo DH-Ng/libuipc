@@ -153,6 +153,8 @@ class GlobalVertexManager final : public SimSystem
         bool try_recover(RecoverInfo& info);
         void apply_recover(RecoverInfo& info);
         void clear_recover(RecoverInfo& info);
+        
+        bool write_vertex_pos_to_sim(span<const Vector3> new_positions, IndexT global_vertex_offset, SizeT vertex_count);
 
         muda::DeviceBuffer<IndexT>  coindices;
         muda::DeviceBuffer<IndexT>  body_ids;
@@ -188,6 +190,8 @@ class GlobalVertexManager final : public SimSystem
     virtual void do_apply_recover(RecoverInfo& info) override;
     virtual void do_clear_recover(RecoverInfo& info) override;
 
+    virtual bool do_write_vertex_pos_to_sim(span<const Vector3> new_positions, IndexT global_vertex_offset, SizeT vertex_count) override;
+  
   private:
     friend class SimEngine;
     friend class MaxTranslationChecker;
